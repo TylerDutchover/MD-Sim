@@ -1,5 +1,5 @@
 #include "simulate.h"
-
+//test 
 
 // def in the main file...i guess it okay
 extern double get_rand();
