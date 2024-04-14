@@ -5,6 +5,7 @@
 #include <iomanip>
 #include <vector>
 #include <cstdlib>
+#include <cmath>
 #include <fstream>
 
 // may change later
@@ -22,6 +23,7 @@ public:
 
     vector<double> get_pos();
     vector<double> get_vel();
+    double get_mass();
 
     void update_pos(vector<double>);
     void update_vel(vector<double>);
@@ -38,8 +40,9 @@ public:
     box(double,double,double);
     box(double);
 
-    void setNumParticles(double);
+    void setNumParticles(double, double);
     void setPositions_random();
+    void setTemperature(double);  
     void setTime(double);
     void setPotential(U_pot);  
 

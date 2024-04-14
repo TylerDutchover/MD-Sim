@@ -1,5 +1,5 @@
 #include "simulate.h"
-//test 
+#include "const.h"
 
 // def in the main file...i guess it okay
 extern double get_rand();
@@ -24,9 +24,9 @@ box::box(double x) {
 }
 
 // create all particles in the particles vector
-void box::setNumParticles(double n) {
+void box::setNumParticles(double n, double mass) {
     N = n;
-    particle myPar;
+    particle myPar(mass);
     for(uint i = 0; i < N; i++) {
         particles.push_back(myPar);
     }
@@ -43,6 +43,18 @@ void box::setPositions_random() {
     }
 }
 
+// use the rms speed for init ?
+void box::setTemperature(double T) {
+    double v_rms;
+    v_rms = (3*K_B*T) / particles.at(0).get_mass();
+    v_rms = sqrt(v_rms);
+    v_rms = v_rms / sqrt(3);
+    for(uint i = 0; i < N; i++) {
+        particles.at(i).update_vel({v_rms, v_rms, v_rms});
+    }
+
+}
+
 // max time for sim to run from 0 -> t_max
 void box::setTime(double tMax) {
     t_max = tMax;
@@ -54,9 +66,15 @@ void box::setPotential(U_pot pot) {
 }
 
 void box::showParts() {
+    double mVel = 0, pVel;
     for(uint i = 0; i < N; i++) {
-        for(auto i : particles.at(i).get_pos())
-            cout << setw(10) << setprecision(10) << left << i << setw(1) << ' ';
+        mVel = 0;
+        for(uint j = 0; j < 3; j++) {
+            pVel = particles.at(i).get_vel().at(j);
+            mVel += pVel * pVel;
+        }
+        mVel = sqrt(mVel);
+        cout << setw(10) << setprecision(10) << left << mVel << setw(1);
         cout << endl;
     }
 }
@@ -88,6 +106,10 @@ vector<double> particle::get_pos() {
 
 vector<double> particle::get_vel() {
     return vel;
+}
+
+double particle::get_mass() {
+    return mass;
 }
 
 void particle::update_pos(vector<double> r) {
