@@ -14,6 +14,8 @@ int main()
     testBox.setNumParticles(5, gas_mass);
     testBox.setPositions_random();
     testBox.setTemperature(300);
+    testBox.setTime(1e-15);
+    testBox.setAcc();
 
     testBox.showParts();
 

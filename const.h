@@ -7,6 +7,11 @@
 #define R       8.3145      //  J / mole * Kel
 
 
+// L-J potential consts
+#define EPS     1
+#define SGMA    1
+
+
 
 
 

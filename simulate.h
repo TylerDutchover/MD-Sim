@@ -23,14 +23,16 @@ public:
 
     vector<double> get_pos();
     vector<double> get_vel();
+    vector<double> get_acc();
     double get_mass();
 
     void update_pos(vector<double>);
     void update_vel(vector<double>);
+    void update_acc(vector<double>);
     void set_mass(double);
 
 private:
-    vector<double> pos, vel;
+    vector<double> pos, vel, acc;
     double mass;
 };
 
@@ -44,16 +46,23 @@ public:
     void setPositions_random();
     void setTemperature(double);  
     void setTime(double);
-    void setPotential(U_pot);  
+    void setAcc();
 
 
-    void showParts(); // strictly for debug
+    // specific
+    vector<double> calc_force(vector<double>, vector<double>);
+      
+
+    void run_sim();
+    void update_pos();
+
+
+    void showParts();
     
 
 private:
     double l_x, l_y, l_z, vol;
     double t_max, t;
-    U_pot potential;
     uint N;
     vector<particle> particles;
 };
