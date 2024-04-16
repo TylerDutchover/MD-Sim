@@ -74,9 +74,9 @@ void box::setAcc() {
 
         for(uint j = 0; j < N; j++) 
         {
-            r2 = particles.at(j).get_pos();                 // grab second postitional vector
             if(j != i) 
             {
+                r2 = particles.at(j).get_pos();                 // grab second postitional vector
                 force = calc_force(r1, r2);                 // calculate the force between the two
                 for(uint q = 0; q < 3; q++)
                     total_force.at(q) += force.at(q);       // sum total force
@@ -86,7 +86,6 @@ void box::setAcc() {
         accl = {total_force.at(0) / M, total_force.at(1) / M, total_force.at(2) / M};
         particles.at(i).update_acc(accl);
     }
-
 }
 
 
@@ -112,21 +111,42 @@ vector<double> box::calc_force(vector<double> r1, vector<double> r2) {
     return f_LJ;
 }
 
-void box::update_pos() {
-    vector<double> r_tmp, v_tmp, a_tmp;
+void box::update_pos(double time_step) {
+    vector<double> r_tmp, v_tmp, a1, a0;
 
     for(uint i = 0; i < N; i++) {
-        ;
+        r_tmp = particles.at(i).get_pos();
+        v_tmp = particles.at(i).get_vel();
+        a1 = particles.at(i).get_acc();
+        a0 = a1;
+
+        if(i == 0) {
+            for(uint q = 0; q < 3; q++)
+                cout << r_tmp.at(q) << ',';
+            cout << '\n';
+        }
+
+        // update postitional vectors before anything else
+        for(uint q = 0; q < 3; q++)
+            r_tmp.at(q) = r_tmp.at(q) + (v_tmp.at(q)*time_step) + (0.5*a1.at(q) * pow(time_step,2));
+        
+        // recalculate the force with the updated positions, then update velocity vector
+        setAcc();
+        for(uint q = 0; q < 3; q++)
+            v_tmp.at(q)  = v_tmp.at(q) + (0.5* (a1.at(q) + a0.at(q)) * time_step);
+
+        particles.at(i).update_pos(r_tmp);
+        particles.at(i).update_vel(v_tmp);
     }
     return;
 }
 
 void box::run_sim() {
-    //double t = 0, t_del = 1e;
+    double t = 0, t_step = 1e-13;
 
     while(t < t_max) {
-        update_pos();
-        t += 1;
+        update_pos(t_step);
+        t += t_step;
     }
     ;
 }

@@ -11,13 +11,14 @@ int main()
     srand(time(NULL));
     box testBox(50);
 
-    testBox.setNumParticles(5, gas_mass);
-    testBox.setPositions_random();
-    testBox.setTemperature(300);
-    testBox.setTime(1e-15);
-    testBox.setAcc();
+    testBox.setNumParticles(5, gas_mass);   // requires mass
+    testBox.setPositions_random();          // random postitions
+    testBox.setTemperature(300);            // set velocity st |v| = v_rms
+    testBox.setTime(1e-5);                 // max time to run sim
+    testBox.setAcc();                       // set acc vector according to LJ force
 
-    testBox.showParts();
+    testBox.run_sim();
+    //testBox.showParts();
 
     return 0;
 }

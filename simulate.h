@@ -54,7 +54,7 @@ public:
       
 
     void run_sim();
-    void update_pos();
+    void update_pos(double);
 
 
     void showParts();
