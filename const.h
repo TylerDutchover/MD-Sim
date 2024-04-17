@@ -8,8 +8,8 @@
 
 
 // L-J potential consts
-#define EPS     1
-#define SGMA    1
+#define EPS     1.65e-21
+#define SGMA    3.4e-10
 
 
 

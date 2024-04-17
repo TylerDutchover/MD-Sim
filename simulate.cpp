@@ -54,7 +54,6 @@ void box::setTemperature(double T) {
     for(uint i = 0; i < N; i++) {
         particles.at(i).update_vel({v_rms, v_rms, v_rms});
     }
-
 }
 
 // max time for sim to run from 0 -> t_max
@@ -64,92 +63,143 @@ void box::setTime(double tMax) {
 
 void box::setAcc() {
 
-    vector<double> total_force, force, r1, r2, accl;
+    vector<double> total_force, r1, r2, accl;
     double M = particles.at(0).get_mass();
 
     for(uint i = 0; i < N; i++) 
     {
-        total_force = {0,0,0};                              // total force on a particle due to the other N-1 particles
-        r1 = particles.at(i).get_pos();                               // grab positional vector of particle
+        total_force = {0,0,0};                                          // total force on a particle due to the other N-1 particles
+        r1 = particles.at(i).get_pos();                                 // grab positional vector of particle
 
         for(uint j = 0; j < N; j++) 
         {
             if(j != i) 
             {
-                r2 = particles.at(j).get_pos();                 // grab second postitional vector
-                force = calc_force(r1, r2);                 // calculate the force between the two
-                for(uint q = 0; q < 3; q++)
-                    total_force.at(q) += force.at(q);       // sum total force
+                r2 = particles.at(j).get_pos();                         // grab second postitional vector
+                total_force = sum(total_force, calc_force(r1,r2));
             }
         }
 
-        accl = {total_force.at(0) / M, total_force.at(1) / M, total_force.at(2) / M};
+        accl = scale(total_force, (1/M));
         particles.at(i).update_acc(accl);
     }
 }
 
-
 // calculates the force between two particles from the lj potential
 vector<double> box::calc_force(vector<double> r1, vector<double> r2) {
-    vector<double> f_LJ;
-    double  r_x  =  r2.at(0) - r1.at(0),
-            r_y  =  r2.at(1) - r1.at(1),
-            r_z  =  r2.at(2) - r1.at(2),
-            r,                              // magnitude of seperation vector        
+    vector<double> r_hat;
+    double  r,                              // magnitude of seperation vector        
             A,                              // sigma    / r
             B,                              // epsilon  / r
             LJ_F_scale;                     // prefactor for LJ force
-        
-    r = sqrt(r_x*r_x + r_y*r_y + r_z*r_z); 
-    f_LJ = {(r_x / r), (r_y / r), (r_z / r) };
+    
+
+    r_hat = sum(r2, scale(r1, -1));
+    r = sqrt( dot_product(r_hat, r_hat) );
+    r_hat = scale(r_hat, 1/r);
 
     A =     SGMA    / r;
     B =     EPS     / r;  
     LJ_F_scale = 24 * B * ( (2*pow(A, 12)) - pow(A,6) );
 
-    f_LJ = { (LJ_F_scale * f_LJ.at(0)), (LJ_F_scale * f_LJ.at(1)), (LJ_F_scale * f_LJ.at(2)) };
-    return f_LJ;
+    return scale(r_hat, LJ_F_scale);
 }
 
 void box::update_pos(double time_step) {
     vector<double> r_tmp, v_tmp, a1, a0;
+    double x;
 
     for(uint i = 0; i < N; i++) {
-        r_tmp = particles.at(i).get_pos();
-        v_tmp = particles.at(i).get_vel();
-        a1 = particles.at(i).get_acc();
-        a0 = a1;
+        r_tmp   = particles.at(i).get_pos();
+        v_tmp   = particles.at(i).get_vel();
+        a1      = particles.at(i).get_acc();
+        a0      = a1;
+        
+        //cout << i << '\t';
+            for(uint q = 0; q < 3; q++) {
+                if(q != 2)
+                    cout << r_tmp.at(q) << ',';
+                else
+                    cout << r_tmp.at(q) << '\n';
+            }
+    
 
-        if(i == 0) {
-            for(uint q = 0; q < 3; q++)
-                cout << r_tmp.at(q) << ',';
-            cout << '\n';
-        }
 
         // update postitional vectors before anything else
-        for(uint q = 0; q < 3; q++)
+        for(uint q = 0; q < 3; q++) {
+            x = r_tmp.at(q);
+            x = x + (v_tmp.at(q)*time_step) + (0.5*a1.at(q) * pow(time_step,2));
+            switch(q) {
+                case 0:
+                    if(x < 0) 
+                        v_tmp = reflect_v(v_tmp, {1,0,0});
+                    else if( x > l_x)
+                        v_tmp = reflect_v(v_tmp, {-1,0,0});
+                break;
+                case 1:
+                    if(x < 0) 
+                        v_tmp = reflect_v(v_tmp, {0,1,0});
+                    else if( x > l_y)
+                        v_tmp = reflect_v(v_tmp, {0,-1,0});
+                break;
+                case 2:
+                    if(x < 0) 
+                        v_tmp = reflect_v(v_tmp, {0,0,1});
+                    else if( x > l_x)
+                        v_tmp = reflect_v(v_tmp, {0,0,-1});
+                break;
+            }
             r_tmp.at(q) = r_tmp.at(q) + (v_tmp.at(q)*time_step) + (0.5*a1.at(q) * pow(time_step,2));
+        }
         
         // recalculate the force with the updated positions, then update velocity vector
         setAcc();
+        a1      =   particles.at(i).get_acc();
         for(uint q = 0; q < 3; q++)
             v_tmp.at(q)  = v_tmp.at(q) + (0.5* (a1.at(q) + a0.at(q)) * time_step);
 
         particles.at(i).update_pos(r_tmp);
         particles.at(i).update_vel(v_tmp);
     }
-    return;
 }
 
 void box::run_sim() {
-    double t = 0, t_step = 1e-13;
-
+    double t = 0, t_step = 1e-11;
     while(t < t_max) {
         update_pos(t_step);
         t += t_step;
     }
     ;
 }
+
+vector<double> box::sum(vector<double> v1, vector<double> v2) {
+    uint n = v1.size();
+    for(uint q = 0; q < n; q++)
+        v1.at(q) = v1.at(q) + v2.at(q);
+    return v1;
+}
+
+vector<double> box::scale(vector<double> v, double a) {
+    uint n = v.size();
+    for(uint q = 0; q < n; q++) 
+        v.at(q) = a * v.at(q);
+    return v;
+}
+
+double box::dot_product(vector<double>v1, vector<double> v2) {
+    uint n = v1.size();
+    double product = 0;
+    for(uint q = 0; q < n; q++)
+        product += v1.at(q)*v2.at(q);
+    return product;
+}
+
+vector<double> box::reflect_v(vector<double> v, vector<double> n) {
+    vector<double> m = scale(n, -2 * dot_product(v,n));
+    v = sum(v, m);
+    return v;
+}
+
 
 
 void box::showParts() {

@@ -57,6 +57,12 @@ public:
     void update_pos(double);
 
 
+    vector<double> sum(vector<double>, vector<double>);
+    vector<double> scale(vector<double>, double);
+    double dot_product(vector<double>, vector<double>);
+    vector<double> reflect_v(vector<double>, vector<double>);
+
+
     void showParts();
     
 
