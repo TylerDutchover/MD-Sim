@@ -12,7 +12,7 @@ int main()
     box testBox(1e-8);
 
     
-    testBox.setNumParticles(50, gas_mass);   // requires mass
+    testBox.setNumParticles(100, gas_mass);   // requires mass
     testBox.setPositions_random();          // random postitions
     testBox.updateSizeBox(1e-5);
     testBox.setTemperature(300);            // set velocity st |v| = v_rms

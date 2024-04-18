@@ -118,10 +118,15 @@ void box::update_pos(double time_step) {
         
         if(i == 0) {
             //for(uint q = 0; q < 3; q++) 
-            for(auto a : r_tmp)
-                cout << setw(15) << setprecision(10) <<  left << a << setw(2) << ' ';
-            for(auto a : v_tmp)
-                cout << setw(15) << setprecision(10) <<  right << a << setw(2) << ' ';
+            for(uint q = 0; q < 3; q++)
+            {
+                if(q != 2)
+                    cout << r_tmp.at(q) << ',';
+                else
+                    cout << r_tmp.at(q) << '\n'; 
+            }
+            //for(auto a : v_tmp)
+            //    cout << setw(15) << setprecision(10) <<  right << a << setw(2) << ' ';
             cout << endl;
         }
     
@@ -153,15 +158,15 @@ void box::update_pos(double time_step) {
             }
             r_tmp.at(q) = r_tmp.at(q) + (v_tmp.at(q)*time_step) + (0.5*a1.at(q) * pow(time_step,2));
         }
-        
-        
         setAcc();                                   // recalculate the forces
+
+
         a1      =   particles.at(i).get_acc();      // grab the updated acceleration
-        
-                                                    //update v
+
         for(uint q = 0; q < 3; q++)
             v_tmp.at(q)  = v_tmp.at(q) + (0.5* (a1.at(q) + a0.at(q)) * time_step);
 
+        // finally update particle position and velocity
         particles.at(i).update_pos(r_tmp);
         particles.at(i).update_vel(v_tmp);
     }
