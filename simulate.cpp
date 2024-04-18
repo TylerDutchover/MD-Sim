@@ -57,8 +57,9 @@ void box::setTemperature(double T) {
 }
 
 // max time for sim to run from 0 -> t_max
-void box::setTime(double tMax) {
+void box::setTime(double tMax, double tstep) {
     t_max = tMax;
+    t_step = tstep;
 }
 
 void box::setAcc() {
@@ -115,13 +116,14 @@ void box::update_pos(double time_step) {
         a1      = particles.at(i).get_acc();
         a0      = a1;
         
-        //cout << i << '\t';
-            for(uint q = 0; q < 3; q++) {
-                if(q != 2)
-                    cout << r_tmp.at(q) << ',';
-                else
-                    cout << r_tmp.at(q) << '\n';
-            }
+        if(i == 0) {
+            //for(uint q = 0; q < 3; q++) 
+            for(auto a : r_tmp)
+                cout << setw(15) << setprecision(10) <<  left << a << setw(2) << ' ';
+            for(auto a : v_tmp)
+                cout << setw(15) << setprecision(10) <<  right << a << setw(2) << ' ';
+            cout << endl;
+        }
     
 
 
@@ -152,9 +154,11 @@ void box::update_pos(double time_step) {
             r_tmp.at(q) = r_tmp.at(q) + (v_tmp.at(q)*time_step) + (0.5*a1.at(q) * pow(time_step,2));
         }
         
-        // recalculate the force with the updated positions, then update velocity vector
-        setAcc();
-        a1      =   particles.at(i).get_acc();
+        
+        setAcc();                                   // recalculate the forces
+        a1      =   particles.at(i).get_acc();      // grab the updated acceleration
+        
+                                                    //update v
         for(uint q = 0; q < 3; q++)
             v_tmp.at(q)  = v_tmp.at(q) + (0.5* (a1.at(q) + a0.at(q)) * time_step);
 
@@ -164,7 +168,7 @@ void box::update_pos(double time_step) {
 }
 
 void box::run_sim() {
-    double t = 0, t_step = 1e-11;
+    double t = 0;
     while(t < t_max) {
         update_pos(t_step);
         t += t_step;
@@ -200,18 +204,8 @@ vector<double> box::reflect_v(vector<double> v, vector<double> n) {
     return v;
 }
 
-
-
 void box::showParts() {
-    double mVel = 0, pVel;
-    for(uint i = 0; i < N; i++) {
-        mVel = 0;
-        for(uint j = 0; j < 3; j++) {
-            pVel = particles.at(i).get_acc().at(j);
-            cout << setw(10) << setprecision(10) << left << pVel << ' ';
-        }
-        cout << endl;
-    }
+    return;
 }
 
 

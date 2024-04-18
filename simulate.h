@@ -45,8 +45,14 @@ public:
     void setNumParticles(double, double);
     void setPositions_random();
     void setTemperature(double);  
-    void setTime(double);
+    void setTime(double, double);
     void setAcc();
+
+    void updateSizeBox(double L) {
+        l_x = L;
+        l_y = L;
+        l_z = L;
+    }
 
 
     // specific
@@ -68,7 +74,7 @@ public:
 
 private:
     double l_x, l_y, l_z, vol;
-    double t_max, t;
+    double t_max, t_step;
     uint N;
     vector<particle> particles;
 };
