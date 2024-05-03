@@ -46,16 +46,25 @@ public:
     void setNumParticles(double, double);
     void setInfluenceZone(double, double);
     void setPositions_random();
-    void setVelocity(double);  
+    void setVelocity();  
     void setTime(double, double);
-    void setAcc();
+    void calc_acceleration();
     void build_ring_for_all();
     void build_ring(uint);
-
-    vector<double> calc_force(vector<double>, vector<double>);
-      
+    void show_ring();
     void run_sim();
     void update_pos(double);
+    void init_walls();
+    void special_setup();
+    void set_temp(double t);
+
+    double  calc_temp();
+    double  calc_total_momentum();
+    double  calc_pressure(double, double);
+    bool    in_equillibrium();
+    vector<double> calc_force(uint, uint);
+      
+    
 
     vector<double> sum(vector<double>, vector<double>);
     vector<double> scale(vector<double>, double);
@@ -65,10 +74,11 @@ public:
     
 
 private:
-    double l_x, l_y, l_z, vol, M, t_max, t_step, r_min, r_max;
+    double l_x, l_y, l_z, vol, M, t_max, t_step, r_min, r_max, p_offset_avg, p_offset;
     uint N;
-    bool recalculate_ring;
-    map<uint, vector<particle>> influence_ring;
+    bool recalculate_ring, equillibrium;
+    map<uint, uint> walls;
+    map<uint, vector<particle*>> influence_ring;
     vector<particle> particles;
 };
 
