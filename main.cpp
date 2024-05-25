@@ -1,3 +1,11 @@
+/*
+    TODO:
+        * cell list
+        * Nose hoover thermometer
+
+
+*/
+
 #include "simulate.h"
 
 double get_rand() {
