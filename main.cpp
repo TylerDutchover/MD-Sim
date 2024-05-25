@@ -2,6 +2,7 @@
     TODO:
         * cell list
         * Nose hoover thermometer
+        * equation of motion rework
 
 
 */
