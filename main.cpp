@@ -3,6 +3,7 @@
         * cell list
         * Nose hoover thermometer
         * equation of motion rework
+        * don't get carried away
 
 
 */
